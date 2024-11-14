@@ -1,0 +1,59 @@
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+public class PlayerController : MonoBehaviour
+{
+
+    public CharacterController controller;
+    public Vector3 _playerVelocity;
+    public bool isGround;
+    public float gravityValue =-9.81f;
+    public float jumpHeigth = 1.0f;
+
+
+    [SerializeField] public  float speed = 5f;
+    void Awake () {
+       controller = GetComponent<CharacterController>();
+    }
+    void Start()
+    {
+    }
+
+    void Update()
+    {
+        isGround = controller.isGrounded;
+        if(isGround && _playerVelocity.y <0) {
+            _playerVelocity.y = 0f;
+        }
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        Vector3 _movement  = new Vector3(horizontal, 0f, vertical).normalized;
+        controller.Move(_movement  * speed * Time.deltaTime);
+        if (Input.GetButtonDown("Jump") && isGround){
+            _playerVelocity.y += Mathf.Sqrt(jumpHeigth  * gravityValue);
+            Debug.Log("Jump");
+        }
+        _playerVelocity.y += gravityValue * Time.deltaTime;
+        controller.Move(_playerVelocity   * Time.deltaTime);
+
+    }
+
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.CompareTag("PickUp"))
+        {
+            //other.gameObject.SetActive(false);
+            //Destroy(other.gameObject);
+        }
+    }
+
+    //void OnTriggerStay(Collider other)
+    //{
+    //    if (other.gameObject.CompareTag("PickUp"))
+    //    {
+    //        other.gameObject.GetComponent<Renderer>().material.color = Color.blue;
+    //    }
+    //}
+
+}

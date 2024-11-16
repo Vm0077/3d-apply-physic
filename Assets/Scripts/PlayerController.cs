@@ -1,52 +1,40 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
+[RequireComponent(typeof(Collider))]
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 20f;
+    private Vector3 mousePressDownPos;
+    private Vector3 mouseReleasePos;
 
-    Rigidbody m_Rigidbody;
-    Vector3 m_Movement;
+    private Rigidbody rb;
 
+    private bool isShoot;
+    
     void Start()
     {
-        m_Rigidbody = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
     }
 
-    void FixedUpdate()
+    private void OnMouseDown()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
-
-        m_Movement.Set(horizontal, 0f, vertical);
-
-        m_Rigidbody.AddForce(m_Movement * speed);
+        mousePressDownPos = Input.mousePosition;
     }
 
-    void OnTriggerEnter(Collider other)
+    private void OnMouseUp()
     {
-        if (other.gameObject.CompareTag("PickUp"))
-        {
-            //other.gameObject.SetActive(false);
-            //Destroy(other.gameObject);
-            other.gameObject.GetComponent<Renderer>().material.color = Color.red;
-        }
+        mouseReleasePos = Input.mousePosition;
+        Shoot(mouseReleasePos-mousePressDownPos);
     }
 
-    //void OnTriggerStay(Collider other)
-    //{
-    //    if (other.gameObject.CompareTag("PickUp"))
-    //    {
-    //        other.gameObject.GetComponent<Renderer>().material.color = Color.blue;
-    //    }
-    //}
-
-    void OnTriggerExit(Collider other)
+    private float forceMultiplier = 1;
+    void Shoot(Vector3 Force)
     {
-        if (other.gameObject.CompareTag("PickUp"))
-        {
-            other.gameObject.GetComponent<Renderer>().material.color = Color.white;
-        }
+        if(isShoot)    
+            return;
+        
+        rb.AddForce(new Vector3(Force.x,Force.y,Force.y) * forceMultiplier);
+        isShoot = true;
     }
+    
 }

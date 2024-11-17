@@ -9,8 +9,17 @@ public class PlayerControllerRB : MonoBehaviour {
   public float speed = 5f;
   [SerializeField]
   public Transform cam;
-  Vector3 _movement;
-  public bool isGround;
+  // public Transform Feet;
+
+  [SerializeField]
+  public Vector3 _movement;
+  [SerializeField]
+  public Quaternion _rotation;
+  public bool grounded;
+  public LayerMask whatIsGround;
+
+  [SerializeField]
+  public float jumpHeight = 10.0f;
   void Awake() {
     rb = GetComponent<Rigidbody>();
     rb.freezeRotation = true;
@@ -18,28 +27,38 @@ public class PlayerControllerRB : MonoBehaviour {
   void Start() {}
 
   void Update() {
-    isGround = checkIfGrounded();
+    checkIfGrounded();
+    HandleInput();
+  }
+  void FixedUpdate() { HandleMovement(); }
 
-    float horizontal = Input.GetAxisRaw("Horizontal");
-    float vertical = Input.GetAxisRaw("Vertical");
+  void HandleInput() {
+    float horizontal = Input.GetAxis("Horizontal");
+    float vertical = Input.GetAxis("Vertical");
     _movement = new Vector3(horizontal, 0f, vertical).normalized;
-    if (isGround && _movement.magnitude < 0.1f) {
-      HandleMovement();
+
+    if (Input.GetButtonDown("Jump")) {
+      Jump();
     }
   }
-  void FixedUpdate() {
-  }
+
+  void Jump() { rb.AddForce(Vector3.up * 10, ForceMode.Impulse); }
+
   void HandleMovement() {
-    Vector3 Move = transform.TransformDirection(_movement);
-    float targetAngle = Mathf.Atan2(Move.x,Move.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
-    transform.rotation = Quaternion.Euler(0f, targetAngle, 0f);
-    Vector3 moveDir = Quaternion.Euler(0f,targetAngle, 0f) * Vector3.forward;
-    Vector3 move = moveDir.normalized  * speed;
-    Debug.Log(move);
-    rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);
+      float targetAngle =
+          Mathf.Atan2(_movement.x, _movement.z) * Mathf.Rad2Deg +
+          cam.eulerAngles.y;
+      if(_movement.magnitude > 0 ) _rotation = Quaternion.Euler(0f, targetAngle, 0f);
+      Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+      Vector3 move = moveDir * _movement.magnitude * speed;
+      if(grounded) {
+        transform.rotation = _rotation;
+        rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);
+      }
+
   }
-  bool checkIfGrounded() {
-    return Physics.Raycast(transform.position, Vector3.down,
-                           transform.localScale.y / 2 + 2f);
-  }
+
+  void CounterMovement() {}
+
+  void checkIfGrounded() { grounded = true; }
 }

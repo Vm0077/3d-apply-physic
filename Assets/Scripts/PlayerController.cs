@@ -59,6 +59,11 @@ public class PlayerController : MonoBehaviour {
     }
   }
 
+
+  void CounterMovement() {
+
+  }
+
   void Dashing() {}
 
   // void OnTriggerStay(Collider other)

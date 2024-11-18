@@ -20,6 +20,9 @@ public class PlayerControllerRB : MonoBehaviour {
 
   [SerializeField]
   public float jumpHeight = 10.0f;
+
+  [SerializeField]
+  public Transform Feet;
   void Awake() {
     rb = GetComponent<Rigidbody>();
     rb.freezeRotation = true;
@@ -51,14 +54,16 @@ public class PlayerControllerRB : MonoBehaviour {
       if(_movement.magnitude > 0 ) _rotation = Quaternion.Euler(0f, targetAngle, 0f);
       Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
       Vector3 move = moveDir * _movement.magnitude * speed;
-      if(grounded) {
-        transform.rotation = _rotation;
-        rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);
-      }
-
+      transform.rotation = _rotation;
+      rb.velocity = new Vector3(move.x, rb.velocity.y, move.z);
   }
 
   void CounterMovement() {}
 
-  void checkIfGrounded() { grounded = true; }
+  void checkIfGrounded() {
+    grounded =  Physics.CheckSphere(
+            Feet.position,1.5f,whatIsGround
+        );
+    Debug.Log(grounded);
+  }
 }
